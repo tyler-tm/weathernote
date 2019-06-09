@@ -82,7 +82,7 @@ const getDailyInfoFromForecast = forecast => {
 const sendEmail = emailBody => {
   const params = {
     Destination: {
-      ToAddresses: [process.env.TO_ADDRESS]
+      ToAddresses: process.env.TO_ADDRESSES.split(';')
     },
     Message: {
       Body: {
