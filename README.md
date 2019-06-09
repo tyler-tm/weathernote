@@ -8,7 +8,7 @@ AWS Lambda function that sends daily weather info from the DarkSky API as an ema
   - FROM address needs to be verified
   - TO addresses need to be verified, if AWS account is in SES Sandbox
 - [Get a DarkSky API Key](https://darksky.net/dev/register)
-- Set AWS Lambda Environment Variables
+- [Set AWS Lambda Environment Variables](https://docs.aws.amazon.com/lambda/latest/dg/env_variables.html)
   - DarkSky API Key as `DARKSKY_API_KEY`
   - GPS Coordinates of Location as `TARGET_COORDS`
   - Verified email from address as `FROM_ADDRESS`
