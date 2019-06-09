@@ -79,10 +79,43 @@ const getDailyInfoFromForecast = forecast => {
   return dailyInfo;
 };
 
+const sendEmail = emailBody => {
+  const params = {
+    Destination: {
+      ToAddresses: [process.env.TO_ADDRESS]
+    },
+    Message: {
+      Body: {
+        Text: {
+          Charset: "UTF-8",
+          Data: emailBody
+        }
+      },
+      Subject: {
+        Charset: "UTF-8",
+        Data: "WeatherNote"
+      }
+    },
+    Source: process.env.FROM_ADDRESS,
+    ReplyToAddresses: [process.env.FROM_ADDRESS]
+  };
+
+  return new AWS.SES({ apiVersion: "2010-12-01" })
+    .sendEmail(params)
+    .promise();
+};
+
 exports.handler = async () => {
   await getTodaysForecast()
-    .then(forecast => {
+    .then(async forecast => {
       console.log(getDailyInfoFromForecast(forecast));
+      await sendEmail("Test Body")
+        .then(result => {
+          console.log(`email sent: ${result}`);
+        })
+        .catch(error => {
+          console.log(`error sending email: ${error}`);
+        });
     })
     .catch(console.error);
 };
