@@ -1,37 +1,37 @@
-const AWS = require("aws-sdk");
+const AWS = require('aws-sdk');
 
 /*
  * Define the DarkSky API as an AWS Service,
  * so we can make high-level HTTP calls from Lambda
  */
 const darkSkyService = new AWS.Service({
-  endpoint: "https://api.darksky.net/",
+  endpoint: 'https://api.darksky.net/',
   convertResponseTypes: false,
   apiConfig: {
     metadata: {
-      protocol: "rest-json"
+      protocol: 'rest-json'
     },
     operations: {
       GetForecast: {
         http: {
-          method: "GET",
+          method: 'GET',
           requestUri:
-            "/forecast/{apiKey}/{targetCoords}" +
-            "?exclude=currently,minutely,hourly"
+            '/forecast/{apiKey}/{targetCoords}' +
+            '?exclude=currently,minutely,hourly'
         },
         input: {
-          type: "structure",
-          required: ["apiKey", "targetCoords"],
+          type: 'structure',
+          required: ['apiKey', 'targetCoords'],
           members: {
             apiKey: {
-              type: "string",
-              location: "uri",
-              locationName: "apiKey"
+              type: 'string',
+              location: 'uri',
+              locationName: 'apiKey'
             },
             targetCoords: {
-              type: "string",
-              location: "uri",
-              locationName: "targetCoords"
+              type: 'string',
+              location: 'uri',
+              locationName: 'targetCoords'
             }
           }
         }
@@ -59,8 +59,8 @@ const getTodaysForecast = () => {
 };
 
 const convertEpochToLocalDateTime = epoch =>
-  new Date(epoch * 1000).toLocaleTimeString("en-US", {
-    timeZone: "America/New_York"
+  new Date(epoch * 1000).toLocaleTimeString('en-US', {
+    timeZone: 'America/New_York'
   });
 
 const getDailyInfoFromForecast = forecast => {
@@ -87,34 +87,43 @@ const sendEmail = emailBody => {
     Message: {
       Body: {
         Text: {
-          Charset: "UTF-8",
+          Charset: 'UTF-8',
           Data: emailBody
         }
       },
       Subject: {
-        Charset: "UTF-8",
-        Data: "WeatherNote"
+        Charset: 'UTF-8',
+        Data: 'WeatherNote'
       }
     },
     Source: process.env.FROM_ADDRESS,
     ReplyToAddresses: [process.env.FROM_ADDRESS]
   };
 
-  return new AWS.SES({ apiVersion: "2010-12-01" })
-    .sendEmail(params)
-    .promise();
+  return new AWS.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
+};
+
+const generateEmailBody = dailyInfo => {
+  let emailBody = '';
+
+  emailBody += `${dailyInfo.daySummary}\n`;
+  emailBody += `High: ${dailyInfo.high} @ ${dailyInfo.highTime}\n`;
+  emailBody += `Low: ${dailyInfo.low} @ ${dailyInfo.lowTime}\n`;
+  emailBody += `UV Index: ${dailyInfo.uvHigh} @ ${dailyInfo.uvHighTime}`;
+
+  return emailBody;
 };
 
 exports.handler = async () => {
   await getTodaysForecast()
     .then(async forecast => {
-      console.log(getDailyInfoFromForecast(forecast));
-      await sendEmail("Test Body")
+      const dailyInfo = getDailyInfoFromForecast(forecast);
+      await sendEmail(generateEmailBody(dailyInfo))
         .then(result => {
-          console.log(`email sent: ${result}`);
+          console.log(`email sent: ${JSON.stringify(result)}`);
         })
         .catch(error => {
-          console.log(`error sending email: ${error}`);
+          console.log(`error sending email: ${JSON.stringify(error)}`);
         });
     })
     .catch(console.error);
