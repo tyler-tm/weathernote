@@ -79,10 +79,12 @@ const getDailyInfoFromForecast = forecast => {
   return dailyInfo;
 };
 
+const getAddressesToSendTo = () => process.env.TO_ADDRESSES.split(';');
+
 const sendEmail = emailBody => {
   const params = {
     Destination: {
-      ToAddresses: process.env.TO_ADDRESSES.split(';')
+      ToAddresses: getAddressesToSendTo()
     },
     Message: {
       Body: {
@@ -103,16 +105,11 @@ const sendEmail = emailBody => {
   return new AWS.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
 };
 
-const generateEmailBody = dailyInfo => {
-  let emailBody = '';
-
-  emailBody += `${dailyInfo.daySummary}\n`;
-  emailBody += `High: ${dailyInfo.high} @ ${dailyInfo.highTime}\n`;
-  emailBody += `Low: ${dailyInfo.low} @ ${dailyInfo.lowTime}\n`;
-  emailBody += `UV Index: ${dailyInfo.uvHigh} @ ${dailyInfo.uvHighTime}`;
-
-  return emailBody;
-};
+const generateEmailBody = dailyInfo =>
+`${dailyInfo.daySummary}
+High: ${dailyInfo.high} @ ${dailyInfo.highTime}
+Low: ${dailyInfo.low} @ ${dailyInfo.lowTime}
+UV Index: ${dailyInfo.uvHigh} @ ${dailyInfo.uvHighTime}`
 
 exports.handler = async () => {
   await getTodaysForecast()
