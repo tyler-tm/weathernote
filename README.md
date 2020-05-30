@@ -1,16 +1,19 @@
-## WeatherNote 🌩
-AWS Lambda function that sends daily weather info from the DarkSky API as an email via AWS SES, in one short JS file
+# WeatherNote 🌩
 
-### Setup 🛠
-- [Add this function to AWS Lambda](https://aws.amazon.com/lambda/)
-- [Add Permision for SES to a IAM Role assigned to the Lambda Function](https://docs.aws.amazon.com/lambda/latest/dg/lambda-permissions.html)
-- [Verify Email Addresses used](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)
-  - FROM address needs to be verified
-  - TO addresses need to be verified, if AWS account is in SES Sandbox
-- [Get a DarkSky API Key](https://darksky.net/dev/register)
-- [Set AWS Lambda Environment Variables](https://docs.aws.amazon.com/lambda/latest/dg/env_variables.html)
-  - DarkSky API Key as `DARKSKY_API_KEY`
-  - GPS Coordinates of Location as `TARGET_COORDS`
-  - Verified email from address as `FROM_ADDRESS`
-  - Email addresses to be sent to as `TO_ADDRESSES` (single address or addresses seperated by `;`)
-- [Schedule Lambda Function with CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/RunLambdaSchedule.html)
+WeatherNote was (and will be) an AWS Lambda function that sends daily weather info from the ~~DarkSky~~ OpenWeatherMap API as an email via AWS SES, in one short ~~JS~~ TS file. The plan is to have no outside dependencies, besides the AWS SDK for interacting with SES and [Denofun](https://github.com/galkowskit/denofun) for some Functional Programming utilities.
+
+This was working as a single, ~100 line JavaScript file that you could deploy as an AWS Lambda function, but I am rewriting it for a couple reasons:
+
+- The DarkSky API [will be going away, and no longer accepts new signups for access](https://blog.darksky.net/)
+- I'm interested in having it run on Deno and follow a more functional paradigm
+
+Currently, `main.ts` will output the temperature at given coordinates. Just clone the repo, add a `client-values.json` file in the same directory as `main.ts`, and try `deno run --allow-read --allow-net main.ts`.
+
+The `client-values.json` file should look something like this:
+
+```
+{
+  "appid": "dc5eb39d1fdba8db8c08fdb34c8682b3",
+  "coords": [40.30969, -105.66679]
+}
+```
